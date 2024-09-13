@@ -1,23 +1,42 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import axios from 'axios';
 
 function App() {
+  const [userName, setUserName] = useState('');
+  const [recommendations, setRecommendations] = useState([]);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('http://127.0.0.1:5000/recommend', { user_name: userName });
+      console.log(response);
+      setRecommendations(response.data.recommendations);
+      setError('');
+    } catch (error) {
+      setError('User not found or invalid input.');
+      setRecommendations([]);
+    }
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Product Recommendations</h1>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+          placeholder="Enter user name"
+        />
+        <button type="submit">Get Recommendations</button>
+      </form>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <ul>
+        {recommendations.map((item, index) => (
+          <li key={index}>{item.item}</li>
+        ))}
+      </ul>
     </div>
   );
 }
